@@ -52,3 +52,13 @@ No celular, abra o link e use **"Adicionar à tela inicial"** para ele virar um 
 
 ## Trocar a senha
 Supabase → **Authentication → Users** → clique no usuário → **Reset password** (ou crie outro usuário e troque o e-mail no `config.js`).
+
+## Integração com WhatsApp (n8n)
+Quando o cliente manda mensagem no WhatsApp, o n8n registra no CRM: número novo vira card em **Chegou**;
+número que já existe tem a **última mensagem** atualizada e o card sobe para o topo da coluna.
+
+1. Rode `whatsapp-integracao.sql` no SQL Editor do Supabase (depois do `schema.sql`).
+2. No n8n, crie uma credencial **Header Auth** com Name `apikey` e Value = chave secreta do Supabase
+   (Project Settings → API Keys → `service_role` ou `secret`). Essa chave **nunca** vai no site.
+3. Cole o conteúdo de `n8n-registrar-no-crm.json` no n8n, escolha a credencial e ligue a saída **true**
+   do node "Tem mensagem?" ao node **Registrar no CRM**.

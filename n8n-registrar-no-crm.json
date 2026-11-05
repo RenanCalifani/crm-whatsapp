@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nevgmjrdbggfgbvqwfbr.supabase.co/rest/v1/rpc/registrar_mensagem",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_telefone: $json.telefone, p_nome: $json.nome, p_mensagem: $json.mensagem }) }}",
+        "options": {}
+      },
+      "name": "Registrar no CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 420],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {}
+}
