@@ -3,186 +3,326 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#075e54">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>CRM WhatsApp</title>
+<title>Funil de Vendas · CRM WhatsApp</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310b981'/%3E%3Cpath d='M11 23.5A8 8 0 1 0 8.5 21L7 25Z' fill='none' stroke='white' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --verde: #075e54;
-    --verde-wa: #25d366;
-    --fundo: #eef1f4;
-    --card: #fff;
-    --texto: #1f2933;
-    --suave: #6b7785;
-    --borda: #dde3e9;
-    --raio: 12px;
-    --col-w: 300px;
+    --bg: #f5f6f8;
+    --superficie: #ffffff;
+    --coluna: #eef0f3;
+    --borda: #e4e7ec;
+    --borda-forte: #d0d5dd;
+    --texto: #101828;
+    --texto-2: #475467;
+    --suave: #98a2b3;
+    --marca: #10b981;
+    --marca-escura: #059669;
+    --marca-clara: #ecfdf5;
+    --wa: #25d366;
+    --alerta: #b54708;
+    --alerta-bg: #fffaeb;
+    --perigo: #d92d20;
+    --raio: 14px;
+    --sombra-1: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+    --sombra-2: 0 12px 24px -6px rgba(16,24,40,.18), 0 4px 8px -4px rgba(16,24,40,.08);
+    --col-w: 304px;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--fundo); color: var(--texto);
-    -webkit-tap-highlight-color: transparent;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px; line-height: 1.45; background: var(--bg); color: var(--texto);
+    -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "cv11", "ss01";
   }
   button, input, textarea { font: inherit; color: inherit; }
   button { cursor: pointer; }
   [hidden] { display: none !important; }
+  svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none;
+          stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---------- Botões e campos ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid transparent; border-radius: 10px; padding: 0 16px; height: 42px;
+    font-weight: 600; white-space: nowrap; transition: background .15s, box-shadow .15s, transform .05s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .6; pointer-events: none; }
+  .btn.primario { background: var(--marca); color: #fff; box-shadow: 0 1px 2px rgba(16,24,40,.1); }
+  .btn.primario:hover { background: var(--marca-escura); }
+  .btn.secundario { background: var(--superficie); border-color: var(--borda-forte); color: var(--texto-2); }
+  .btn.secundario:hover { background: #f9fafb; }
+  .btn.perigo { background: transparent; color: var(--perigo); padding: 0 10px; }
+  .btn.perigo:hover { background: #fef3f2; }
+  .btn-icone {
+    display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 10px;
+    border: 1px solid var(--borda); background: var(--superficie); color: var(--texto-2);
+  }
+  .btn-icone:hover { background: #f9fafb; color: var(--texto); }
+
+  .campo { display: flex; flex-direction: column; gap: 6px; }
+  .campo > span { font-size: 13px; font-weight: 500; color: var(--texto-2); }
+  .entrada {
+    display: flex; align-items: center; gap: 8px; background: var(--superficie);
+    border: 1px solid var(--borda-forte); border-radius: 10px; padding: 0 12px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .entrada:focus-within { border-color: var(--marca); box-shadow: 0 0 0 4px rgba(16,185,129,.15); }
+  .entrada input, .entrada textarea {
+    flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 11px 0;
+    font-size: 16px; /* evita zoom automático no iPhone */
+  }
+  .entrada textarea { resize: vertical; min-height: 96px; line-height: 1.5; }
+  .entrada .prefixo { color: var(--suave); font-weight: 500; }
+  .entrada svg { color: var(--suave); }
 
   /* ---------- Login ---------- */
   #login {
-    min-height: 100%; display: grid; place-items: center; padding: 24px;
-    background: linear-gradient(160deg, var(--verde), #128c7e);
+    min-height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 24px;
+    background:
+      radial-gradient(1000px 500px at 10% -10%, rgba(16,185,129,.18), transparent 60%),
+      radial-gradient(800px 500px at 110% 110%, rgba(37,211,102,.14), transparent 60%),
+      var(--bg);
   }
-  #login form {
-    width: 100%; max-width: 340px; background: #fff; border-radius: 16px;
-    padding: 28px 22px; box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  .login-card {
+    width: 100%; max-width: 380px; background: var(--superficie); border: 1px solid var(--borda);
+    border-radius: 20px; padding: 32px 28px; box-shadow: var(--sombra-2);
   }
-  #login h1 { margin: 0 0 4px; font-size: 1.4rem; }
-  #login p { margin: 0 0 18px; color: var(--suave); }
-  .erro { color: #c62828; font-size: .9rem; min-height: 1.2em; margin: 8px 0 0; }
+  .login-card .logo { width: 48px; height: 48px; border-radius: 14px; margin-bottom: 20px; }
+  .login-card .logo svg { width: 26px; height: 26px; }
+  .login-card h1 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+  .login-card p { margin: 6px 0 24px; color: var(--texto-2); }
+  .login-card .btn { width: 100%; margin-top: 16px; height: 46px; }
+  .erro { color: var(--perigo); font-size: 13px; min-height: 18px; margin: 10px 0 0; text-align: center; }
+  .olho { border: 0; background: none; color: var(--suave); padding: 4px; display: grid; }
 
-  input, textarea {
-    width: 100%; padding: 12px; border: 1px solid var(--borda); border-radius: 10px;
-    background: #fff; color: var(--texto); font-size: 16px; /* 16px evita zoom automático no iPhone */
+  /* ---------- Estrutura ---------- */
+  #app { height: 100%; height: 100dvh; display: flex; flex-direction: column; }
+  .logo {
+    display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; flex: none;
+    background: linear-gradient(145deg, #34d399, var(--marca-escura)); color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 2px 6px rgba(5,150,105,.35);
   }
-  input:focus, textarea:focus { outline: 2px solid var(--verde-wa); border-color: transparent; }
-  .btn {
-    border: 0; border-radius: 10px; padding: 12px 16px; font-weight: 600;
-    background: var(--verde); color: #fff; min-height: 44px;
-  }
-  .btn.sec { background: #e6eaee; color: var(--texto); }
-  .btn.perigo { background: transparent; color: #c62828; }
-  .btn:disabled { opacity: .6; }
-  .largo { width: 100%; margin-top: 12px; }
+  .logo svg { width: 20px; height: 20px; stroke-width: 2.2; color: #fff; }
 
-  /* ---------- App ---------- */
-  #app { height: 100%; display: flex; flex-direction: column; }
-  header {
-    background: var(--verde); color: #fff; padding: 10px 14px;
-    padding-top: max(10px, env(safe-area-inset-top));
-    display: flex; align-items: center; gap: 10px;
+  .topo {
+    display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+    padding-top: max(14px, env(safe-area-inset-top));
+    background: var(--superficie); border-bottom: 1px solid var(--borda);
   }
-  header h1 { font-size: 1.1rem; margin: 0; flex: 1; }
-  header .resumo { font-size: .8rem; opacity: .85; }
-  .icone {
-    background: rgba(255,255,255,.15); border: 0; color: #fff; border-radius: 8px;
-    padding: 8px 10px; font-size: .85rem;
-  }
+  .marca { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .marca strong { display: block; font-size: 16px; letter-spacing: -.01em; }
+  .marca small { display: block; color: var(--suave); font-size: 12px; }
+  .topo-acoes { display: flex; align-items: center; gap: 10px; }
+  .busca { width: 300px; height: 40px; background: #f9fafb; }
+  .busca input { padding: 8px 0; font-size: 14px; }
 
-  /* Abas (só no celular) */
-  nav#abas {
-    display: flex; gap: 6px; overflow-x: auto; padding: 8px 10px; background: #fff;
-    border-bottom: 1px solid var(--borda); scrollbar-width: none;
+  .kpis {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 16px 24px 4px;
   }
-  nav#abas::-webkit-scrollbar { display: none; }
-  nav#abas button {
-    flex: none; border: 1px solid var(--borda); background: #fff; border-radius: 999px;
-    padding: 6px 12px; font-size: .85rem; white-space: nowrap;
+  .kpi {
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio);
+    padding: 14px 16px; box-shadow: var(--sombra-1);
   }
-  nav#abas button.ativa { background: var(--texto); color: #fff; border-color: var(--texto); }
-  nav#abas .n { opacity: .7; margin-left: 4px; }
+  .kpi span { display: flex; align-items: center; gap: 6px; color: var(--texto-2); font-size: 12.5px; font-weight: 500; }
+  .kpi span i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+  .kpi strong { display: block; font-size: 22px; letter-spacing: -.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi small { color: var(--suave); font-size: 12px; }
 
+  /* Abas (celular) */
+  #abas {
+    display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px 2px; scrollbar-width: none;
+  }
+  #abas::-webkit-scrollbar { display: none; }
+  #abas button {
+    flex: none; display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px;
+    border: 1px solid var(--borda); background: var(--superficie); border-radius: 999px;
+    font-size: 13px; font-weight: 500; color: var(--texto-2); transition: all .15s;
+  }
+  #abas button i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+  #abas button b { font-weight: 600; color: var(--suave); font-variant-numeric: tabular-nums; }
+  #abas button.ativa { background: var(--texto); border-color: var(--texto); color: #fff; }
+  #abas button.ativa b { color: rgba(255,255,255,.6); }
+
+  /* ---------- Quadro ---------- */
   #quadro {
-    flex: 1; display: flex; gap: 12px; padding: 12px; overflow-x: auto; overflow-y: hidden;
-    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    flex: 1; min-height: 0; display: flex; gap: 14px; padding: 16px 24px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
   }
   .coluna {
     flex: none; width: var(--col-w); display: flex; flex-direction: column;
-    background: #e3e8ed; border-radius: var(--raio); max-height: 100%;
-    scroll-snap-align: center; border-top: 4px solid var(--cor);
+    background: var(--coluna); border-radius: 16px; max-height: 100%;
   }
-  .coluna-topo { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
-  .coluna-topo h2 { font-size: .95rem; margin: 0; flex: 1; }
-  .coluna-topo .cont {
-    background: rgba(0,0,0,.08); border-radius: 999px; padding: 1px 8px; font-size: .8rem;
+  .coluna-topo { padding: 14px 14px 10px; }
+  .coluna-linha { display: flex; align-items: center; gap: 8px; }
+  .coluna-linha i { width: 10px; height: 10px; border-radius: 50%; background: var(--c);
+                    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 20%, transparent); }
+  .coluna-linha h2 { margin: 0; font-size: 14px; font-weight: 600; flex: 1; }
+  .badge {
+    min-width: 24px; height: 22px; padding: 0 7px; border-radius: 999px; display: inline-grid; place-items: center;
+    background: var(--superficie); color: var(--texto-2); font-size: 12px; font-weight: 600;
+    border: 1px solid var(--borda); font-variant-numeric: tabular-nums;
   }
   .coluna-topo .add {
-    border: 0; background: transparent; font-size: 1.4rem; line-height: 1; padding: 2px 8px;
-    color: var(--suave); border-radius: 6px;
+    width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent;
+    color: var(--suave); display: grid; place-items: center;
   }
-  .total { padding: 0 12px 8px; font-size: .8rem; color: var(--suave); }
+  .coluna-topo .add:hover { background: var(--superficie); color: var(--texto); }
+  .total { margin: 6px 0 0 18px; font-size: 13px; color: var(--texto-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .total:empty { display: none; }
+
   .lista {
-    flex: 1; overflow-y: auto; padding: 0 8px 80px; min-height: 80px;
-    display: flex; flex-direction: column; gap: 8px;
+    flex: 1; overflow-y: auto; padding: 4px 10px 14px; min-height: 90px;
+    display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin;
   }
-  .vazio { text-align: center; color: var(--suave); font-size: .85rem; padding: 18px 8px; }
+  .vazio {
+    border: 1.5px dashed var(--borda-forte); border-radius: 12px; padding: 22px 12px;
+    text-align: center; color: var(--suave); font-size: 13px;
+  }
 
+  /* ---------- Card ---------- */
   .card {
-    background: var(--card); border-radius: 10px; padding: 10px 12px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.08); user-select: none; -webkit-user-select: none;
-    touch-action: manipulation;
+    position: relative; background: var(--superficie); border: 1px solid var(--borda);
+    border-radius: 12px; padding: 12px; box-shadow: var(--sombra-1); cursor: pointer;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    transition: box-shadow .15s, border-color .15s;
   }
-  .card .l1 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-  .card .nome { font-weight: 600; word-break: break-word; }
-  .card .valor { font-size: .85rem; color: var(--verde); font-weight: 600; white-space: nowrap; }
-  .card .l2 { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-  .card .tel { font-size: .85rem; color: var(--suave); flex: 1; }
-  .card .nota {
-    margin-top: 6px; font-size: .85rem; color: #45505c; white-space: pre-wrap;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  .card:hover { border-color: var(--borda-forte); box-shadow: var(--sombra-2); }
+  .card-topo { display: flex; align-items: center; gap: 10px; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    font-size: 13px; font-weight: 600; color: hsl(var(--h) 45% 32%); background: hsl(var(--h) 70% 92%);
   }
-  .wa {
-    display: inline-flex; align-items: center; gap: 5px; background: var(--verde-wa); color: #fff;
-    text-decoration: none; font-size: .8rem; font-weight: 600; border-radius: 999px;
-    padding: 6px 11px; min-height: 32px;
+  .info { flex: 1; min-width: 0; }
+  .nome { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tel { font-size: 12.5px; color: var(--texto-2); font-variant-numeric: tabular-nums; }
+  .tel.sem { color: var(--suave); font-style: italic; }
+  .wa-btn {
+    width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: var(--wa); color: #fff; box-shadow: 0 2px 6px rgba(37,211,102,.4); transition: transform .15s;
   }
-  .wa svg { width: 15px; height: 15px; fill: currentColor; }
-  .wa.off { background: #c9d1d9; pointer-events: none; }
+  .wa-btn:hover { transform: scale(1.06); }
+  .wa-btn svg { width: 19px; height: 19px; fill: currentColor; }
+  .wa-btn.off { background: #f2f4f7; color: var(--suave); box-shadow: none; pointer-events: none; }
+  .nota {
+    margin: 10px 0 0; padding: 8px 10px; background: #f9fafb; border-radius: 8px;
+    font-size: 12.5px; color: var(--texto-2); white-space: pre-wrap; word-break: break-word;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-rodape { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+  .valor { font-weight: 700; font-size: 13.5px; color: var(--marca-escura); font-variant-numeric: tabular-nums; }
+  .valor.zero { color: var(--suave); font-weight: 500; font-size: 12.5px; }
+  .tempo { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--suave); }
+  .tempo svg { width: 13px; height: 13px; }
+  .tempo.alerta { color: var(--alerta); background: var(--alerta-bg); padding: 2px 7px; border-radius: 999px; font-weight: 500; }
 
-  .fantasma { opacity: .35; }
-  .escolhido { box-shadow: 0 8px 20px rgba(0,0,0,.25); transform: rotate(1.5deg); }
+  .fantasma { background: var(--marca-clara); border: 1.5px dashed var(--marca); box-shadow: none; }
+  .fantasma > * { visibility: hidden; }
+  .escolhido { box-shadow: var(--sombra-2); }
+  .sortable-drag, .sortable-fallback { transform: rotate(2deg); box-shadow: 0 20px 40px -8px rgba(16,24,40,.3) !important; opacity: 1 !important; }
 
   #fab {
-    position: fixed; right: 18px; bottom: max(18px, env(safe-area-inset-bottom));
-    width: 58px; height: 58px; border-radius: 50%; border: 0; background: var(--verde-wa);
-    color: #fff; font-size: 2rem; line-height: 1; box-shadow: 0 6px 16px rgba(0,0,0,.25);
+    position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 5;
+    width: 58px; height: 58px; border-radius: 18px; border: 0; color: #fff; display: grid; place-items: center;
+    background: linear-gradient(145deg, #34d399, var(--marca-escura));
+    box-shadow: 0 10px 24px -6px rgba(5,150,105,.6);
   }
+  #fab svg { width: 26px; height: 26px; stroke-width: 2.4; }
 
   /* ---------- Modal ---------- */
   dialog {
-    border: 0; padding: 0; border-radius: 16px; width: min(480px, 100%);
-    max-height: 92vh; color: var(--texto);
+    border: 0; padding: 0; border-radius: 20px; width: min(520px, calc(100% - 32px));
+    max-height: min(92vh, 860px); color: var(--texto); box-shadow: var(--sombra-2); overflow: hidden;
   }
-  dialog::backdrop { background: rgba(0,0,0,.45); }
-  dialog form { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-  dialog h3 { margin: 0; }
-  label { font-size: .85rem; color: var(--suave); display: flex; flex-direction: column; gap: 4px; }
-  textarea { min-height: 110px; resize: vertical; }
-  .etapas { display: flex; flex-wrap: wrap; gap: 6px; }
-  .etapas label { flex-direction: row; }
-  .etapas input { position: absolute; opacity: 0; width: 0; height: 0; }
+  dialog[open] { animation: entra .2s ease-out; }
+  dialog::backdrop { background: rgba(16,24,40,.5); backdrop-filter: blur(3px); }
+  @keyframes entra { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+  dialog form { display: flex; flex-direction: column; max-height: inherit; }
+  .modal-topo { position: relative; display: flex; align-items: center; gap: 12px; padding: 20px 22px 4px; }
+  .modal-topo h3 { margin: 0; font-size: 18px; letter-spacing: -.01em; flex: 1; }
+  .modal-topo .btn-icone { border: 0; width: 36px; height: 36px; }
+  .modal-corpo { padding: 14px 22px 4px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+  .grade-2 { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); gap: 12px; }
+  .etapas { display: flex; flex-wrap: wrap; gap: 8px; }
+  .etapas label { position: relative; }
+  .etapas input { position: absolute; opacity: 0; pointer-events: none; }
   .etapas span {
-    border: 1px solid var(--borda); border-radius: 999px; padding: 8px 12px; font-size: .85rem;
-    color: var(--texto); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 13px; border-radius: 10px;
+    border: 1px solid var(--borda-forte); font-size: 13px; font-weight: 500; color: var(--texto-2);
+    cursor: pointer; transition: all .15s; background: var(--superficie);
   }
-  .etapas input:checked + span { background: var(--cor); border-color: var(--cor); color: #fff; }
-  .etapas input:focus-visible + span { outline: 2px solid var(--verde-wa); }
-  .acoes { display: flex; gap: 8px; align-items: center; }
-  .acoes .esp { flex: 1; }
+  .etapas span i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+  .etapas input:checked + span {
+    border-color: var(--c); color: var(--texto);
+    background: color-mix(in srgb, var(--c) 10%, white);
+    box-shadow: 0 0 0 1px var(--c) inset;
+  }
+  .etapas input:focus-visible + span { box-shadow: 0 0 0 4px rgba(16,185,129,.2); }
+  .abrir-wa {
+    display: inline-flex; align-items: center; gap: 6px; color: #128c7e; font-weight: 600; font-size: 13px;
+    text-decoration: none; align-self: flex-start; margin-top: -6px;
+  }
+  .abrir-wa svg { width: 16px; height: 16px; fill: currentColor; }
+  .meta { font-size: 12px; color: var(--suave); }
+  .meta:empty { display: none; }
+  .modal-rodape {
+    display: flex; align-items: center; gap: 10px; padding: 16px 22px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid var(--borda); margin-top: 16px;
+  }
+  .modal-rodape .esp { flex: 1; }
 
   #aviso {
-    position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%);
-    background: #222; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: .9rem;
-    z-index: 10; max-width: 90vw;
+    position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    background: var(--texto); color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13.5px;
+    z-index: 20; max-width: 90vw; box-shadow: var(--sombra-2);
+  }
+
+  .carregando .lista { opacity: .4; }
+
+  /* ---------- Desktop ---------- */
+  @media (min-width: 821px) {
+    #abas, #fab { display: none !important; }
+    .coluna { flex: 1 1 0; min-width: 260px; max-width: 380px; }
   }
 
   /* ---------- Celular ---------- */
-  @media (max-width: 760px) {
-    :root { --col-w: calc(100vw - 40px); }
-    #quadro { gap: 10px; padding: 10px 20px; scroll-padding: 0 20px; }
-    dialog {
-      margin: auto 0 0; width: 100%; max-width: 100%; border-radius: 16px 16px 0 0;
-      max-height: 94vh;
+  @media (max-width: 820px) {
+    :root { --col-w: calc(100vw - 32px); }
+    .topo { flex-wrap: wrap; gap: 12px; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); }
+    .topo-acoes { display: contents; }
+    .busca { order: 3; width: 100%; }
+    #novo { display: none; }
+    .kpis {
+      display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px 16px 2px; gap: 10px;
+      scrollbar-width: none;
     }
-    dialog form { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
-    header .resumo { display: none; }
-  }
-  @media (min-width: 761px) {
-    nav#abas { display: none; }
-    #quadro { scroll-snap-type: none; }
+    .kpis::-webkit-scrollbar { display: none; }
+    .kpi { flex: none; min-width: 150px; padding: 10px 14px; scroll-snap-align: start; }
+    .kpi strong { font-size: 18px; margin-top: 2px; }
+    .kpi small { font-size: 11.5px; }
+    #quadro { padding: 12px 16px; gap: 12px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
+    .coluna { scroll-snap-align: start; }
+    .lista { padding-bottom: 90px; }
+    dialog {
+      margin: auto 0 0; width: 100%; max-width: 100%; border-radius: 22px 22px 0 0; max-height: 94dvh;
+    }
+    dialog[open] { animation: sobe .25s cubic-bezier(.2,.8,.2,1); }
+    @keyframes sobe { from { transform: translateY(100%); } }
+    .modal-topo::before {
+      content: ""; position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+      width: 40px; height: 4px; border-radius: 4px; background: var(--borda-forte);
+    }
+    .modal-rodape .btn { flex: 1; }
+    .modal-rodape .esp { display: none; }
+    .modal-rodape .btn.perigo { flex: none; }
   }
 </style>
 </head>
@@ -190,52 +330,90 @@
 
 <!-- Tela de senha -->
 <section id="login" hidden>
-  <form id="form-login">
-    <h1>CRM WhatsApp</h1>
-    <p>Digite a senha para entrar</p>
-    <input id="senha" type="password" autocomplete="current-password" placeholder="Senha" required>
-    <button class="btn largo" type="submit">Entrar</button>
+  <form class="login-card" id="form-login">
+    <div class="logo" data-icone="chat"></div>
+    <h1>Bem-vindo de volta</h1>
+    <p>Digite a senha para acessar o funil de vendas.</p>
+    <label class="campo">
+      <span>Senha</span>
+      <div class="entrada">
+        <span data-icone="cadeado"></span>
+        <input id="senha" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        <button type="button" class="olho" id="ver-senha" aria-label="Mostrar senha" data-icone="olho"></button>
+      </div>
+    </label>
+    <button class="btn primario" type="submit">Entrar</button>
     <p class="erro" id="erro-login"></p>
   </form>
 </section>
 
 <!-- App -->
 <section id="app" hidden>
-  <header>
-    <h1>CRM WhatsApp</h1>
-    <span class="resumo" id="resumo"></span>
-    <button class="icone" id="sair" title="Sair">Sair</button>
+  <header class="topo">
+    <div class="marca">
+      <div class="logo" data-icone="chat"></div>
+      <div><strong>Funil de vendas</strong><small>CRM WhatsApp</small></div>
+    </div>
+    <div class="topo-acoes">
+      <label class="entrada busca">
+        <span data-icone="busca"></span>
+        <input id="busca" type="search" placeholder="Buscar nome, telefone ou anotação" autocomplete="off">
+      </label>
+      <button class="btn primario" id="novo"><span data-icone="mais"></span>Novo contato</button>
+      <button class="btn-icone" id="sair" title="Sair" aria-label="Sair" data-icone="sair"></button>
+    </div>
   </header>
+
+  <section class="kpis">
+    <div class="kpi" style="--c:#2e90fa"><span><i></i>Em negociação</span><strong id="k-aberto">R$ 0</strong><small id="k-aberto-n"></small></div>
+    <div class="kpi" style="--c:#12b76a"><span><i></i>Vendas fechadas</span><strong id="k-fechado">R$ 0</strong><small id="k-fechado-n"></small></div>
+    <div class="kpi" style="--c:#7a5af8"><span><i></i>Taxa de conversão</span><strong id="k-conv">–</strong><small>fechados ÷ finalizados</small></div>
+    <div class="kpi" style="--c:#f79009"><span><i></i>Ticket médio</span><strong id="k-ticket">–</strong><small>das vendas fechadas</small></div>
+  </section>
+
   <nav id="abas"></nav>
-  <main id="quadro"></main>
-  <button id="fab" aria-label="Novo contato">+</button>
+  <main id="quadro" class="carregando"></main>
+  <button id="fab" aria-label="Novo contato" data-icone="mais"></button>
 </section>
 
 <!-- Modal de cadastro/edição -->
 <dialog id="modal">
-  <form id="form-lead" method="dialog">
-    <h3 id="modal-titulo">Novo contato</h3>
-    <label>Nome
-      <input name="nome" required autocomplete="off" maxlength="120">
-    </label>
-    <label>Telefone (com DDD)
-      <input name="telefone" type="tel" inputmode="tel" placeholder="(11) 98765-4321" autocomplete="off">
-    </label>
-    <label>Valor estimado (R$)
-      <input name="valor" inputmode="decimal" placeholder="0,00" autocomplete="off">
-    </label>
-    <label>Anotações
-      <textarea name="anotacao" placeholder="O que a pessoa quer, combinados, próximos passos…"></textarea>
-    </label>
-    <div>
-      <label style="margin-bottom:6px">Etapa</label>
-      <div class="etapas" id="etapas"></div>
+  <form id="form-lead" method="dialog" novalidate>
+    <div class="modal-topo">
+      <h3 id="modal-titulo">Novo contato</h3>
+      <button type="button" class="btn-icone" id="fechar" aria-label="Fechar" data-icone="x"></button>
     </div>
-    <div class="acoes">
-      <button type="button" class="btn perigo" id="excluir">Excluir</button>
+    <div class="modal-corpo">
+      <label class="campo">
+        <span>Nome</span>
+        <div class="entrada"><input name="nome" autocomplete="off" maxlength="120" placeholder="Nome do cliente"></div>
+      </label>
+      <div class="grade-2">
+        <label class="campo">
+          <span>WhatsApp</span>
+          <div class="entrada"><input name="telefone" type="tel" inputmode="tel" placeholder="(11) 98765-4321" autocomplete="off"></div>
+        </label>
+        <label class="campo">
+          <span>Valor estimado</span>
+          <div class="entrada"><span class="prefixo">R$</span><input name="valor" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+        </label>
+      </div>
+      <a class="abrir-wa" id="abrir-wa" target="_blank" rel="noopener" hidden></a>
+      <div class="campo">
+        <span>Etapa</span>
+        <div class="etapas" id="etapas"></div>
+      </div>
+      <label class="campo">
+        <span>Anotações</span>
+        <div class="entrada"><textarea name="anotacao" placeholder="O que a pessoa quer, combinados, próximos passos…"></textarea></div>
+      </label>
+      <div class="meta" id="meta"></div>
+    </div>
+    <div class="modal-rodape">
+      <button type="button" class="btn perigo" id="excluir" aria-label="Excluir" title="Excluir contato"><span data-icone="lixo"></span></button>
       <span class="esp"></span>
-      <button type="button" class="btn sec" id="cancelar">Cancelar</button>
-      <button type="submit" class="btn" id="salvar">Salvar</button>
+      <button type="button" class="btn secundario" id="cancelar">Cancelar</button>
+      <button type="submit" class="btn primario" id="salvar">Salvar</button>
     </div>
   </form>
 </dialog>
@@ -248,20 +426,40 @@
 <script>
 (() => {
   const COLUNAS = [
-    { id: "chegou",      nome: "Chegou",            cor: "#64748b" },
-    { id: "conversando", nome: "Conversando",       cor: "#0284c7" },
-    { id: "orcamento",   nome: "Orçamento enviado", cor: "#d97706" },
-    { id: "fechou",      nome: "Fechou",            cor: "#16a34a" },
-    { id: "perdeu",      nome: "Perdeu",            cor: "#dc2626" },
+    { id: "chegou",      nome: "Chegou",            cor: "#667085" },
+    { id: "conversando", nome: "Conversando",       cor: "#2e90fa" },
+    { id: "orcamento",   nome: "Orçamento enviado", cor: "#f79009" },
+    { id: "fechou",      nome: "Fechou",            cor: "#12b76a" },
+    { id: "perdeu",      nome: "Perdeu",            cor: "#f04438" },
   ];
+  const ABERTAS = ["chegou", "conversando", "orcamento"];
+  const DIAS_ALERTA = 3; // contato parado há X dias numa etapa aberta fica destacado
+
+  const ICONES = {
+    chat: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+    busca: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    mais: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+    sair: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    lixo: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    relogio: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    cadeado: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    olho: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  };
+  const ic = (n) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONES[n]}</svg>`;
+  const ICONE_WA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
 
   const $ = (s, el = document) => el.querySelector(s);
   const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-  const ICONE_WA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
+  const brlCurto = (v) => brl.format(v).replace(/,00$/, "");
+
+  document.querySelectorAll("[data-icone]").forEach((el) => {
+    el.insertAdjacentHTML("afterbegin", ic(el.dataset.icone));
+  });
 
   const cfg = window.CONFIG || {};
   if (!cfg.SUPABASE_URL || cfg.SUPABASE_URL.includes("SEU-PROJETO")) {
-    document.body.innerHTML = '<p style="padding:24px;font-family:sans-serif">Configure o arquivo <b>config.js</b> com os dados do seu Supabase.</p>';
+    document.body.innerHTML = '<p style="padding:24px">Configure o arquivo <b>config.js</b> com os dados do seu Supabase.</p>';
     return;
   }
   const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
@@ -270,19 +468,20 @@
   let arrastando = false;
   let editandoId = null;
   let canal = null;
+  let busca = "";
+  const sortables = [];
 
   // ---------- Utilidades ----------
   function aviso(msg) {
     const el = $("#aviso");
     el.textContent = msg; el.hidden = false;
-    clearTimeout(aviso.t); aviso.t = setTimeout(() => (el.hidden = true), 3500);
+    clearTimeout(aviso.t); aviso.t = setTimeout(() => (el.hidden = true), 3000);
   }
 
   function numeroWhats(tel) {
-    let d = String(tel || "").replace(/\D/g, "");
+    let d = String(tel || "").replace(/\D/g, "").replace(/^0+/, "");
     if (!d) return "";
-    d = d.replace(/^0+/, "");                          // tira 0 de discagem (ex.: 011...)
-    if (d.length <= 11) d = (cfg.DDI_PADRAO || "55") + d; // sem DDI: adiciona o padrão
+    if (d.length <= 11) d = (cfg.DDI_PADRAO || "55") + d;
     return d.length >= 12 ? d : "";
   }
 
@@ -293,11 +492,21 @@
     return tel || "";
   }
 
+  // Máscara enquanto digita: (11) 98765-4321
+  function mascaraTel(v) {
+    const d = v.replace(/\D/g, "");
+    if (d.length > 11 || v.trim().startsWith("+")) return v; // número internacional: não mexe
+    if (d.length <= 2) return d ? `(${d}` : "";
+    if (d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+    if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+    return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  }
+
   function lerValor(txt) {
     let s = String(txt || "").replace(/[^\d,.-]/g, "");
     if (!s) return 0;
     if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
-    else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ""); // "1.500" = mil e quinhentos
+    else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");
     const n = Number(s);
     return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0;
   }
@@ -305,60 +514,98 @@
   const valorParaCampo = (v) =>
     Number(v) ? Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
 
+  function iniciais(nome) {
+    const p = String(nome).trim().split(/\s+/).filter(Boolean);
+    return ((p[0]?.[0] || "") + (p.length > 1 ? p[p.length - 1][0] : "")).toUpperCase() || "?";
+  }
+  function corDoNome(nome) {
+    let h = 0;
+    for (const c of String(nome)) h = (h * 31 + c.charCodeAt(0)) % 360;
+    return h;
+  }
+
+  function diasDesde(data) {
+    if (!data) return null;
+    return Math.floor((Date.now() - new Date(data).getTime()) / 864e5);
+  }
+  function tempoRelativo(data) {
+    const d = diasDesde(data);
+    if (d === null) return "";
+    if (d <= 0) return "hoje";
+    if (d === 1) return "ontem";
+    if (d < 30) return `há ${d} dias`;
+    const m = Math.floor(d / 30);
+    return m === 1 ? "há 1 mês" : `há ${m} meses`;
+  }
+  const dataLonga = (d) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+
+  const semAcento = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  function combina(l) {
+    if (!busca) return true;
+    const alvo = semAcento(`${l.nome} ${l.telefone} ${l.anotacao}`);
+    const digitos = busca.replace(/\D/g, "");
+    return alvo.includes(busca) || (digitos.length >= 3 && String(l.telefone).replace(/\D/g, "").includes(digitos));
+  }
+
   const doStatus = (st) =>
     leads.filter((l) => l.status === st).sort((a, b) => a.posicao - b.posicao);
+  const soma = (arr) => arr.reduce((s, l) => s + Number(l.valor || 0), 0);
 
   // ---------- Montagem do quadro ----------
   function montarQuadro() {
     const quadro = $("#quadro"), abas = $("#abas");
-    quadro.innerHTML = ""; abas.innerHTML = "";
 
     COLUNAS.forEach((c) => {
       const col = document.createElement("section");
-      col.className = "coluna"; col.id = "col-" + c.id; col.style.setProperty("--cor", c.cor);
+      col.className = "coluna"; col.id = "col-" + c.id; col.style.setProperty("--c", c.cor);
       col.innerHTML = `
         <div class="coluna-topo">
-          <h2></h2><span class="cont">0</span>
-          <button class="add" title="Adicionar aqui" aria-label="Adicionar em ${c.nome}">+</button>
+          <div class="coluna-linha">
+            <i></i><h2></h2><span class="badge">0</span>
+            <button class="add" title="Adicionar nesta etapa">${ic("mais")}</button>
+          </div>
+          <div class="total"></div>
         </div>
-        <div class="total"></div>
         <div class="lista" data-status="${c.id}"></div>`;
       $("h2", col).textContent = c.nome;
       $(".add", col).onclick = () => abrirModal(null, c.id);
       quadro.appendChild(col);
 
-      new Sortable($(".lista", col), {
+      sortables.push(new Sortable($(".lista", col), {
         group: "leads",
-        animation: 150,
-        delay: 180,              // no celular: segure o card para arrastar (rolar continua livre)
+        animation: 180,
+        easing: "cubic-bezier(.2,.8,.2,1)",
+        delay: 200,              // no celular: segure o card para arrastar (rolar continua livre)
         delayOnTouchOnly: true,
-        touchStartThreshold: 5,
+        touchStartThreshold: 6,
         ghostClass: "fantasma",
         chosenClass: "escolhido",
-        filter: ".wa, .vazio",
+        filter: ".wa-btn, .vazio",
         preventOnFilter: false,
         scroll: true,
         bubbleScroll: true,
-        scrollSensitivity: 60,
-        onStart: () => { arrastando = true; },
+        scrollSensitivity: 70,
+        onStart: () => { arrastando = true; navigator.vibrate?.(15); },
         onEnd: soltou,
-      });
+      }));
 
       const aba = document.createElement("button");
-      aba.dataset.col = c.id;
-      aba.innerHTML = `<span></span><span class="n">0</span>`;
-      aba.firstChild.textContent = c.nome;
-      aba.onclick = () => col.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      aba.dataset.col = c.id; aba.style.setProperty("--c", c.cor);
+      aba.innerHTML = `<i></i><span></span><b>0</b>`;
+      $("span", aba).textContent = c.nome;
+      aba.onclick = () => quadro.scrollTo({ left: col.offsetLeft - quadro.offsetLeft - 16, behavior: "smooth" });
       abas.appendChild(aba);
     });
 
-    // Destaca a aba da coluna visível
     const obs = new IntersectionObserver((ents) => {
       ents.forEach((e) => {
-        if (e.isIntersecting) {
-          const id = e.target.id.replace("col-", "");
-          abas.querySelectorAll("button").forEach((b) => b.classList.toggle("ativa", b.dataset.col === id));
-        }
+        if (!e.isIntersecting) return;
+        const id = e.target.id.replace("col-", "");
+        abas.querySelectorAll("button").forEach((b) => {
+          const ativa = b.dataset.col === id;
+          b.classList.toggle("ativa", ativa);
+          if (ativa) abas.scrollTo({ left: b.offsetLeft - 16, behavior: "smooth" });
+        });
       });
     }, { root: quadro, threshold: 0.6 });
     quadro.querySelectorAll(".coluna").forEach((c) => obs.observe(c));
@@ -368,56 +615,87 @@
     const card = document.createElement("article");
     card.className = "card"; card.dataset.id = l.id;
     const wa = numeroWhats(l.telefone);
+    const parado = ABERTAS.includes(l.status) ? diasDesde(l.updated_at || l.created_at) : null;
+    const alerta = parado !== null && parado >= DIAS_ALERTA;
+
     card.innerHTML = `
-      <div class="l1"><span class="nome"></span><span class="valor"></span></div>
-      <div class="l2">
-        <span class="tel"></span>
-        <a class="wa ${wa ? "" : "off"}" target="_blank" rel="noopener"
-           ${wa ? `href="https://wa.me/${wa}"` : ""}>${ICONE_WA} WhatsApp</a>
+      <div class="card-topo">
+        <div class="avatar" style="--h:${corDoNome(l.nome)}"></div>
+        <div class="info"><div class="nome"></div><div class="tel"></div></div>
+        <a class="wa-btn ${wa ? "" : "off"}" target="_blank" rel="noopener" title="Abrir conversa no WhatsApp"
+           ${wa ? `href="https://wa.me/${wa}"` : ""}>${ICONE_WA}</a>
       </div>
-      <div class="nota"></div>`;
+      <p class="nota"></p>
+      <div class="card-rodape">
+        <span class="valor"></span>
+        <span class="tempo ${alerta ? "alerta" : ""}">${ic("relogio")}<span></span></span>
+      </div>`;
+    $(".avatar", card).textContent = iniciais(l.nome);
     $(".nome", card).textContent = l.nome;
-    $(".valor", card).textContent = Number(l.valor) ? brl.format(l.valor) : "";
-    $(".tel", card).textContent = formatarTel(l.telefone) || "sem telefone";
+    const tel = $(".tel", card);
+    tel.textContent = formatarTel(l.telefone) || "sem telefone";
+    if (!l.telefone) tel.classList.add("sem");
     const nota = $(".nota", card);
     if (l.anotacao) nota.textContent = l.anotacao; else nota.remove();
-    $(".wa", card).addEventListener("click", (e) => e.stopPropagation());
+    const valor = $(".valor", card);
+    if (Number(l.valor)) valor.textContent = brlCurto(Number(l.valor));
+    else { valor.textContent = "Sem valor"; valor.classList.add("zero"); }
+
+    const tempo = $(".tempo", card);
+    if (alerta) {
+      tempo.lastElementChild.textContent = `parado ${parado} dias`;
+      tempo.title = "Sem movimentação — que tal chamar no WhatsApp?";
+    } else if (l.created_at) {
+      tempo.lastElementChild.textContent = tempoRelativo(l.created_at);
+      tempo.title = "Chegou em " + dataLonga(l.created_at);
+    } else tempo.remove();
+
+    $(".wa-btn", card).addEventListener("click", (e) => e.stopPropagation());
     card.addEventListener("click", () => abrirModal(l.id));
     return card;
   }
 
   function render() {
-    let aberto = 0;
     COLUNAS.forEach((c) => {
       const col = $("#col-" + c.id), lista = $(".lista", col);
-      const itens = doStatus(c.id);
-      const soma = itens.reduce((s, l) => s + Number(l.valor || 0), 0);
-      if (c.id !== "fechou" && c.id !== "perdeu") aberto += soma;
+      const itens = doStatus(c.id).filter(combina);
+      const total = soma(itens);
 
       lista.replaceChildren(...itens.map(criarCard));
       if (!itens.length) {
         const v = document.createElement("div");
-        v.className = "vazio"; v.textContent = "Nenhum contato";
+        v.className = "vazio";
+        v.textContent = busca ? "Nada encontrado" : "Arraste um contato para cá";
         lista.appendChild(v);
       }
-      $(".cont", col).textContent = itens.length;
-      $(".total", col).textContent = soma ? "Total: " + brl.format(soma) : "";
-      $(`#abas [data-col="${c.id}"] .n`).textContent = itens.length;
+      $(".badge", col).textContent = itens.length;
+      $(".total", col).textContent = total ? brlCurto(total) : "";
+      $(`#abas [data-col="${c.id}"] b`).textContent = itens.length;
     });
-    const fechado = doStatus("fechou").reduce((s, l) => s + Number(l.valor || 0), 0);
-    $("#resumo").textContent = `Em negociação: ${brl.format(aberto)} · Fechado: ${brl.format(fechado)}`;
+
+    const abertos = leads.filter((l) => ABERTAS.includes(l.status));
+    const fechados = doStatus("fechou"), perdidos = doStatus("perdeu");
+    const vAberto = soma(abertos), vFechado = soma(fechados);
+    const finalizados = fechados.length + perdidos.length;
+    $("#k-aberto").textContent = brlCurto(vAberto);
+    $("#k-aberto-n").textContent = `${abertos.length} ${abertos.length === 1 ? "contato" : "contatos"} em aberto`;
+    $("#k-fechado").textContent = brlCurto(vFechado);
+    $("#k-fechado-n").textContent = `${fechados.length} ${fechados.length === 1 ? "venda" : "vendas"}`;
+    $("#k-conv").textContent = finalizados ? Math.round((fechados.length / finalizados) * 100) + "%" : "–";
+    $("#k-ticket").textContent = fechados.length ? brlCurto(vFechado / fechados.length) : "–";
+    $("#quadro").classList.remove("carregando");
   }
 
   // ---------- Arrastar e soltar ----------
   async function soltou(evt) {
     arrastando = false;
     const mudancas = [];
-    const listas = new Set([evt.from, evt.to]);
-    listas.forEach((lista) => {
+    new Set([evt.from, evt.to]).forEach((lista) => {
       const status = lista.dataset.status;
       lista.querySelectorAll(".card").forEach((el, i) => {
         const l = leads.find((x) => x.id === el.dataset.id);
         if (l && (l.status !== status || l.posicao !== i)) {
+          if (l.status !== status) l.updated_at = new Date().toISOString();
           l.status = status; l.posicao = i;
           mudancas.push({ id: l.id, status, posicao: i });
         }
@@ -425,6 +703,10 @@
     });
     render();
     if (!mudancas.length) return;
+    if (evt.from !== evt.to) {
+      const destino = evt.to.dataset.status;
+      aviso(destino === "fechou" ? "🎉 Venda fechada!" : `Movido para "${COLUNAS.find((c) => c.id === destino).nome}"`);
+    }
     const res = await Promise.all(mudancas.map((m) =>
       sb.from("leads").update({ status: m.status, posicao: m.posicao }).eq("id", m.id)));
     if (res.some((r) => r.error)) { aviso("Não foi possível salvar. Recarregando…"); carregar(); }
@@ -433,9 +715,16 @@
   // ---------- Modal ----------
   function montarEtapas() {
     $("#etapas").innerHTML = COLUNAS.map((c) => `
-      <label style="--cor:${c.cor}">
-        <input type="radio" name="status" value="${c.id}"><span>${c.nome}</span>
+      <label style="--c:${c.cor}">
+        <input type="radio" name="status" value="${c.id}"><span><i></i>${c.nome}</span>
       </label>`).join("");
+  }
+
+  function atualizarLinkWa() {
+    const f = $("#form-lead"), a = $("#abrir-wa");
+    const wa = numeroWhats(f.telefone.value);
+    a.hidden = !wa;
+    if (wa) { a.href = `https://wa.me/${wa}`; a.innerHTML = ICONE_WA + "Abrir conversa no WhatsApp"; }
   }
 
   function abrirModal(id, statusInicial = "chegou") {
@@ -449,10 +738,13 @@
     f.telefone.value = l ? formatarTel(l.telefone) : "";
     f.valor.value = l ? valorParaCampo(l.valor) : "";
     f.anotacao.value = l?.anotacao || "";
-    const st = l?.status || statusInicial;
-    f.querySelector(`input[name=status][value="${st}"]`).checked = true;
+    f.querySelector(`input[name=status][value="${l?.status || statusInicial}"]`).checked = true;
+    $("#meta").textContent = l?.created_at
+      ? `Chegou em ${dataLonga(l.created_at)}` + (l.updated_at ? ` · atualizado ${tempoRelativo(l.updated_at)}` : "")
+      : "";
+    atualizarLinkWa();
     $("#modal").showModal();
-    if (!l) setTimeout(() => f.nome.focus(), 50);
+    if (!l && matchMedia("(min-width: 821px)").matches) setTimeout(() => f.nome.focus(), 50);
   }
 
   async function salvar(e) {
@@ -465,10 +757,9 @@
       anotacao: f.anotacao.value.trim(),
       status: f.status.value,
     };
-    if (!dados.nome) return f.nome.focus();
+    if (!dados.nome) { aviso("Informe o nome do contato"); return f.nome.focus(); }
     const atual = editandoId ? leads.find((x) => x.id === editandoId) : null;
     if (!atual || atual.status !== dados.status) {
-      // entra no topo da coluna
       const col = doStatus(dados.status);
       dados.posicao = col.length ? col[0].posicao - 1 : 0;
     }
@@ -485,16 +776,19 @@
     if (i >= 0) leads[i] = data; else leads.push(data);
     $("#modal").close();
     render();
+    if (data.status === "fechou" && atual?.status !== "fechou") aviso("🎉 Venda fechada!");
+    else if (!atual) aviso("Contato adicionado");
   }
 
   async function excluir() {
     const l = leads.find((x) => x.id === editandoId);
-    if (!l || !confirm(`Excluir "${l.nome}"?`)) return;
+    if (!l || !confirm(`Excluir "${l.nome}"? Essa ação não pode ser desfeita.`)) return;
     const { error } = await sb.from("leads").delete().eq("id", l.id);
     if (error) return aviso("Erro ao excluir: " + error.message);
     leads = leads.filter((x) => x.id !== l.id);
     $("#modal").close();
     render();
+    aviso("Contato excluído");
   }
 
   // ---------- Dados ----------
@@ -519,30 +813,41 @@
   // ---------- Login ----------
   async function entrar(e) {
     e.preventDefault();
-    const btn = e.target.querySelector("button"), erro = $("#erro-login");
-    erro.textContent = ""; btn.disabled = true;
+    const btn = e.target.querySelector("button[type=submit]"), erro = $("#erro-login");
+    erro.textContent = ""; btn.disabled = true; btn.textContent = "Entrando…";
     const { error } = await sb.auth.signInWithPassword({ email: cfg.LOGIN_EMAIL, password: $("#senha").value });
-    btn.disabled = false;
-    if (error) { erro.textContent = "Senha incorreta."; $("#senha").select(); }
+    btn.disabled = false; btn.textContent = "Entrar";
+    if (error) { erro.textContent = "Senha incorreta. Tente novamente."; $("#senha").select(); }
   }
 
   function mostrar(logado) {
     $("#login").hidden = logado;
     $("#app").hidden = !logado;
     if (logado) { carregar(); ouvirMudancas(); }
-    else { leads = []; if (canal) { sb.removeChannel(canal); canal = null; } $("#senha").value = ""; }
+    else {
+      leads = [];
+      if (canal) { sb.removeChannel(canal); canal = null; }
+      $("#senha").value = "";
+    }
   }
 
   // ---------- Início ----------
   montarQuadro();
   montarEtapas();
   $("#form-login").addEventListener("submit", entrar);
+  $("#ver-senha").onclick = () => { const s = $("#senha"); s.type = s.type === "password" ? "text" : "password"; };
   $("#form-lead").addEventListener("submit", salvar);
-  $("#cancelar").onclick = () => $("#modal").close();
+  $("#form-lead").telefone.addEventListener("input", (e) => { e.target.value = mascaraTel(e.target.value); atualizarLinkWa(); });
+  $("#cancelar").onclick = $("#fechar").onclick = () => $("#modal").close();
   $("#excluir").onclick = excluir;
-  $("#fab").onclick = () => abrirModal(null, "chegou");
-  $("#sair").onclick = () => sb.auth.signOut();
+  $("#fab").onclick = $("#novo").onclick = () => abrirModal(null, "chegou");
+  $("#sair").onclick = () => { if (confirm("Sair do CRM?")) sb.auth.signOut(); };
   $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") e.target.close(); });
+  $("#busca").addEventListener("input", (e) => {
+    busca = semAcento(e.target.value.trim());
+    sortables.forEach((s) => s.option("disabled", !!busca)); // não reordena com filtro ativo
+    render();
+  });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("#app").hidden) carregar(); });
 
   let logadoAtual = null;

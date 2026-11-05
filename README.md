@@ -45,7 +45,9 @@ No celular, abra o link e use **"Adicionar à tela inicial"** para ele virar um 
 - **Arrastar:** no computador, clique e arraste. No celular, **segure o card meio segundo** e arraste.
   Para trocar de coluna no celular, também dá para tocar no card e escolher a etapa (é mais rápido).
 - **Botão WhatsApp:** abre a conversa direto. Telefones sem DDI recebem +55 automaticamente.
-- Totais por coluna e o resumo "Em negociação / Fechado" são calculados com o valor estimado.
+- No topo: valor em negociação, vendas fechadas, taxa de conversão e ticket médio.
+- **Busca** por nome, telefone ou anotação.
+- Contatos em etapas abertas sem movimentação há 3 dias ou mais ganham o selo laranja **"parado X dias"** — sinal para chamar no WhatsApp.
 - Se duas pessoas usam ao mesmo tempo, o quadro se atualiza sozinho.
 
 ## Trocar a senha
